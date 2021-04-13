@@ -1,0 +1,196 @@
+<!doctype html>
+<html lang="en">
+
+<head>
+  <meta charset="utf-8">
+  <title>Svg canvas image file</title>
+  <link rel="stylesheet" href="main.css">
+</head>
+
+<body>
+
+  <script src="canvasToBlob.js"></script>
+  <script src="downloadBlob.js"></script>
+
+  <div id="rect">
+    <h1>Options</h1>
+    <ul>
+      <li>use png everywhere outside IE</li>
+      <li>in IE, don't save thumbnails, generate them on the fly (saved in chrome, opened in IE will work)</li>
+      <li>still need ratio?</li>
+      <li>save svg string, convert on the fly in the browser (don't have to save the image!)</li>
+      <li>draw simple rects, texts on the canvas manually - app can do this!</li>
+    </ul>
+    <h2>Draw rect</h2>
+    <canvas></canvas>
+    <button class="save">Save file</button>
+    <button class="draw">Draw image</button>
+    <img/>
+    <script type="text/javascript">
+      (function() {
+        const canvas = rect.querySelector('canvas');
+
+        canvas.width = 100;
+        canvas.height = 100;
+
+        const ctx = canvas.getContext('2d');
+        ctx.fillStyle = '#0f0';
+        ctx.fillRect(10, 10, 10, 10);
+
+        rect.querySelector('.draw').addEventListener('click', function() {
+          rect.querySelector('img').src = canvas.toDataURL("image/png");
+        })
+
+        rect.querySelector('.save').addEventListener('click', function() {
+          try {
+            canvasToBlob(canvas, function(blob) {
+              downloadBlob(blob, 'test.png');
+            })
+          } catch (err) {
+            alert(err);
+          }
+        })
+      })()
+    </script>
+  </div>
+  <div id="localImg">
+    <h2>Local img</h2>
+    <canvas></canvas>
+    <button class="save">Save file</button>
+    <button class="draw">Draw image</button>
+    <img/>
+    <script type="text/javascript">
+      (function() {
+        const canvas = localImg.querySelector('canvas');
+        const ctx = canvas.getContext('2d');
+
+        canvas.width = 100;
+        canvas.height = 100;
+
+        const img = new Image();
+        img.onload = function() {
+          ctx.drawImage(img, 0, 0, 100, 100, 0, 0, 100, 100)
+        }
+        img.src = 'cat.jpg';
+
+        localImg.querySelector('.draw').addEventListener('click', function() {
+          localImg.querySelector('img').src = canvas.toDataURL("image/png");
+        })
+
+        localImg.querySelector('.save').addEventListener('click', function() {
+          try {
+            canvasToBlob(canvas, function(blob) {
+              downloadBlob(blob, 'test.png');
+            })
+          } catch (err) {
+            alert(err);
+          }
+        })
+      })()
+    </script>
+  </div>
+  <div id="remoteImg">
+    <h2>Remote img</h2>
+    <canvas></canvas>
+    <button class="save">Save file</button>
+    <button class="draw">Draw image</button>
+    <img/>
+    <script type="text/javascript">
+      (function() {
+        const canvas = remoteImg.querySelector('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 100;
+        canvas.height = 100;
+
+        const img = new Image();
+        img.crossOrigin = 'Anonymous';
+        img.onload = function() {
+          ctx.drawImage(img, 0, 0, 32, 32, 0, 0, 100, 100)
+        }
+        img.src = 'https://raw.githubusercontent.com/autioch/tracker-poznan/main/webapp/src/services/groups/icons/chatapolska.png';
+
+        remoteImg.querySelector('.draw').addEventListener('click', function() {
+          remoteImg.querySelector('img').src = canvas.toDataURL("image/png");
+        })
+
+        remoteImg.querySelector('.save').addEventListener('click', function() {
+          try {
+            canvasToBlob(canvas, function(blob) {
+              downloadBlob(blob, 'test.png');
+            })
+          } catch (err) {
+            alert(err);
+          }
+        })
+      })()
+    </script>
+  </div>
+  <div id="svgimg">
+    <h2>SVG to img to canvas</h2>
+    <div><a href="https://designashirt.github.io/svg-canvas-tests/">designashirt.github.io/svg-canvas-tests</a><div>
+    <canvas></canvas>
+    <button class="save">Save file</button>
+    <button class="draw">Draw image</button>
+    <img/>
+    <span class="tmp">
+      <svg xmlns="http://www.w3.org/2000/svg" width="100" height="100">
+        <rect x="25" y="25" width="50" height="50" fill="#0ff"></rect>
+      </svg>
+    </span>
+
+    <script type="text/javascript">
+      // https://github.com/canvg/canvg/issues/239
+      // https://github.com/niklasvh/html2canvas/issues/95
+      // https://reference.codeproject.com/book/dom/canvas_api/drawing_dom_objects_into_a_canvas
+      // https://stackoverflow.com/questions/14614336/canvas-tainted-after-drawing-svg
+      // https://stackoverflow.com/questions/18112047/canvas-todataurl-working-in-all-browsers-except-ie10
+      // https://stackoverflow.com/questions/27230293/how-to-draw-an-inline-svg-in-dom-to-a-canvas
+      // https://stackoverflow.com/questions/30101143/canvas-todataurl-gives-security-error-in-ie-11
+      // https://stackoverflow.com/questions/32735822/tainted-canvas-with-canvas-toblob
+      // https://stackoverflow.com/questions/33364396/svg-tained-canvas-ie-security-error-todataurl
+      // https://stackoverflow.com/questions/3768565/drawing-an-svg-file-on-a-html5-canvas
+      // https://stackoverflow.com/questions/39148582/javascript-todataurl-throwing-security-error-tainted-canvases-may-not-be-ex
+      // https://stackoverflow.com/questions/51540423/why-i-cant-to-get-canvas-todataurl-in-ie-11
+      // https://www.npmjs.com/package/canvg
+      (function() {
+        const canvas = svgimg.querySelector('canvas');
+        const ctx = canvas.getContext('2d');
+        canvas.width = 100;
+        canvas.height = 100;
+
+        const svg = svgimg.querySelector('svg');
+        const img = new Image();
+        const xml = (new XMLSerializer()).serializeToString(svg);
+        img.crossOrigin = 'Anonymous';
+        img.onload = function() {
+          ctx.drawImage(img, 0, 0, 100, 100, 0, 0, 100, 100)
+        }
+        img.onerror = function (err, arg1, arg2){
+           alert(err.message)
+         }
+
+        img.src = "data:image/svg+xml;base64," + btoa(xml); // encodeURIComponent
+        // img.src = "data:image/svg+xml;charset=utf-8," + xml;
+        // img.src =URL.createObjectURL(new Blob([xml], { type: "image/svg+xml;charset=utf-8" }));
+
+        // img.src = "data:image/svg+xml;base64," + btoa(svgimg.querySelector('.tmp').innerHTML.trim());
+
+        svgimg.querySelector('.draw').addEventListener('click', function() {
+          svgimg.querySelector('img').src = canvas.toDataURL("image/png");
+        })
+
+        svgimg.querySelector('.save').addEventListener('click', function() {
+          try {
+            canvasToBlob(canvas, function(blob) {
+              downloadBlob(blob, 'test.png');
+            })
+          } catch (err) {
+            alert(err);
+          }
+        })
+      })()
+    </script>
+  </div>
+</body>
+
+</html>
